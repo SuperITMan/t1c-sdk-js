@@ -1,11 +1,10 @@
 import { T1CConfig } from '../T1CConfig';
-import { T1CLibException } from '../exceptions/CoreExceptions';
-import { DataArrayResponse, SingleReaderResponse } from '../../..';
+import { Method } from 'axios';
 export interface Connection {
-    get(basePath: string | undefined, suffix: string, queryParams?: any[], headers?: undefined, callback?: ((error: T1CLibException, data: DataArrayResponse) => void) | undefined): Promise<any>;
-    post(basePath: string, suffix: string, body: RequestBody, queryParams?: QueryParams, headers?: RequestHeaders, callback?: RequestCallback): Promise<any>;
-    put(basePath: string, suffix: string, body: RequestBody, queryParams?: QueryParams, headers?: RequestHeaders, callback?: RequestCallback): Promise<any>;
-    delete(basePath: string, suffix: string, queryParams?: QueryParams, headers?: RequestHeaders, callback?: RequestCallback): Promise<any>;
+    get(basePath: string, suffix: string, queryParams?: any[], headers?: undefined): Promise<any>;
+    post(basePath: string, suffix: string, body: RequestBody, queryParams?: QueryParams, headers?: RequestHeaders): Promise<any>;
+    put(basePath: string, suffix: string, body: RequestBody, queryParams?: QueryParams, headers?: RequestHeaders): Promise<any>;
+    delete(basePath: string, suffix: string, queryParams?: QueryParams, headers?: RequestHeaders): Promise<any>;
 }
 export interface RequestBody {
     [key: string]: any;
@@ -35,13 +34,13 @@ export declare abstract class GenericConnection implements Connection {
     constructor(cfg: T1CConfig);
     private static disabledWithoutApiKey;
     private static extractAccessToken;
-    get(basePath: string, suffix: string, queryParams?: any[], headers?: any, callback?: ((error: T1CLibException, data: DataArrayResponse) => void) | ((error: T1CLibException, data: SingleReaderResponse) => void) | undefined): Promise<any>;
-    post(basePath: string, suffix: string, body: RequestBody, queryParams?: QueryParams, headers?: RequestHeaders, callback?: RequestCallback): Promise<any>;
-    put(basePath: string, suffix: string, body: RequestBody, queryParams?: QueryParams, headers?: RequestHeaders, callback?: RequestCallback): Promise<any>;
-    delete(basePath: string, suffix: string, queryParams?: QueryParams, headers?: RequestHeaders, callback?: RequestCallback): Promise<any>;
+    get(basePath: string, suffix: string, queryParams?: any[], headers?: any): Promise<any>;
+    post(basePath: string, suffix: string, body: RequestBody, queryParams?: QueryParams, headers?: RequestHeaders): Promise<any>;
+    put(basePath: string, suffix: string, body: RequestBody, queryParams?: QueryParams, headers?: RequestHeaders): Promise<any>;
+    delete(basePath: string, suffix: string, queryParams?: QueryParams, headers?: RequestHeaders): Promise<any>;
     getRequestHeaders(headers?: RequestHeaders): RequestHeaders;
     getSecurityConfig(): SecurityConfig;
-    protected handleRequest(basePath: string, suffix: string, method: string, gclConfig: T1CConfig, securityConfig: SecurityConfig, body?: RequestBody, params?: QueryParams, headers?: RequestHeaders, callback?: RequestCallback): Promise<any>;
+    protected handleRequest(basePath: string, suffix: string, method: Method, gclConfig: T1CConfig, securityConfig: SecurityConfig, body?: RequestBody, params?: QueryParams, headers?: RequestHeaders): Promise<any>;
 }
 export declare class LocalAdminConnection extends GenericConnection implements Connection {
     cfg: T1CConfig;
@@ -53,23 +52,23 @@ export declare class LocalAuthAdminConnection extends GenericConnection implemen
     constructor(cfg: T1CConfig);
     getRequestHeaders(headers: RequestHeaders): RequestHeaders;
     getSecurityConfig(): SecurityConfig;
-    requestLogFile(basePath: string, suffix: string, callback?: RequestCallback): Promise<any>;
+    requestLogFile(basePath: string, suffix: string): Promise<any>;
 }
 export declare class LocalAuthConnection extends GenericConnection implements Connection {
     cfg: T1CConfig;
     constructor(cfg: T1CConfig);
     getRequestHeaders(headers?: RequestHeaders): RequestHeaders;
     getSecurityConfig(): SecurityConfig;
-    getSkipCitrix(basePath: string, suffix: string, queryParams?: QueryParams, headers?: RequestHeaders, callback?: RequestCallback): Promise<any>;
-    postSkipCitrix(basePath: string, suffix: string, queryParams?: QueryParams, body?: RequestBody, headers?: RequestHeaders, callback?: RequestCallback): Promise<any>;
-    requestLogFile(basePath: string, suffix: string, callback?: RequestCallback): Promise<any>;
+    getSkipCitrix(basePath: string, suffix: string, queryParams?: QueryParams, headers?: RequestHeaders): Promise<any>;
+    postSkipCitrix(basePath: string, suffix: string, queryParams?: QueryParams, body?: RequestBody, headers?: RequestHeaders): Promise<any>;
+    requestLogFile(basePath: string, suffix: string): Promise<any>;
 }
 export declare class LocalConnection extends GenericConnection implements Connection {
     cfg: T1CConfig;
     constructor(cfg: T1CConfig);
     getRequestHeaders(headers: RequestHeaders): RequestHeaders;
     getSecurityConfig(): SecurityConfig;
-    getSkipCitrix(basePath: string, suffix: string, queryParams?: QueryParams, headers?: RequestHeaders, callback?: RequestCallback): Promise<any>;
+    getSkipCitrix(basePath: string, suffix: string, queryParams?: QueryParams, headers?: RequestHeaders): Promise<any>;
 }
 export declare class RemoteApiKeyConnection extends GenericConnection implements Connection {
     cfg: T1CConfig;
@@ -83,10 +82,10 @@ export declare class RemoteJwtConnection extends GenericConnection implements Co
 }
 export declare class LocalTestConnection extends GenericConnection implements Connection {
     config: undefined;
-    get(basePath: string, suffix: string, queryParams?: any[], headers?: undefined, callback?: ((error: T1CLibException, data: DataArrayResponse) => void) | undefined): Promise<any>;
-    post(basePath: string, suffix: string, body: RequestBody, queryParams?: QueryParams, headers?: RequestHeaders, callback?: RequestCallback): Promise<any>;
-    put(basePath: string, suffix: string, body: RequestBody, queryParams?: QueryParams, headers?: RequestHeaders, callback?: RequestCallback): Promise<any>;
-    delete(basePath: string, suffix: string, queryParams?: QueryParams, headers?: RequestHeaders, callback?: RequestCallback): Promise<any>;
-    getRequestHeaders(headers: RequestHeaders): RequestHeaders;
+    get(basePath: string, suffix: string, queryParams?: any[], headers?: undefined): Promise<any>;
+    post(basePath: string, suffix: string, body: RequestBody, queryParams?: QueryParams, headers?: RequestHeaders): Promise<any>;
+    put(basePath: string, suffix: string, body: RequestBody, queryParams?: QueryParams, headers?: RequestHeaders): Promise<any>;
+    delete(basePath: string, suffix: string, queryParams?: QueryParams, headers?: RequestHeaders): Promise<any>;
+    getRequestHeaders(headers: RequestHeaders | undefined): RequestHeaders;
     private handleTestRequest;
 }

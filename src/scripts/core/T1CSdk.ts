@@ -111,8 +111,7 @@ export class T1CClient {
   }
 
   public static initialize(
-    cfg: T1CConfig,
-    callback?: (error?: T1CLibException, client?: T1CClient) => void
+    cfg: T1CConfig
   ): Promise<T1CClient> {
     return new Promise((resolve, reject) => {
       const initTime = moment();
@@ -240,10 +239,8 @@ export class T1CClient {
       );
   }*/
 
-  public retrieveEncryptedUserPin(
-    callback?: (error: T1CLibException, data: DataResponse) => void
-  ) {
-    return this.core().retrieveEncryptedUserPin(callback);
+  public retrieveEncryptedUserPin(): Promise<DataResponse> {
+    return this.core().retrieveEncryptedUserPin();
   }
 
   /**

@@ -13,8 +13,5 @@ export class EidBe {
     containerUrl: string,
     connection: LocalConnection,
     reader_id: string
-  ) {
-
-  }
-
+  ) {}
 }

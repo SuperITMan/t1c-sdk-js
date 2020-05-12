@@ -1,8 +1,12 @@
 import {T1CConfig} from '../T1CConfig';
-import axios, {AxiosError, AxiosRequestConfig, AxiosResponse} from 'axios';
-import {T1CLibException} from '../exceptions/CoreExceptions';
-import * as store from 'store2';
-import {DataArrayResponse, SingleReaderResponse} from '../../..';
+import axios, {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse,
+  Method,
+} from 'axios';
+import {T1CLibException} from '../../..';
+import store from 'store2';
 import {UrlUtil} from '../../util/UrlUtil';
 
 export interface Connection {
@@ -10,10 +14,7 @@ export interface Connection {
     basePath: string,
     suffix: string,
     queryParams?: any[],
-    headers?: undefined,
-    callback?:
-      | ((error: T1CLibException, data: DataArrayResponse) => void)
-      | undefined
+    headers?: undefined
   ): Promise<any>;
 
   post(
@@ -21,8 +22,7 @@ export interface Connection {
     suffix: string,
     body: RequestBody,
     queryParams?: QueryParams,
-    headers?: RequestHeaders,
-    callback?: RequestCallback
+    headers?: RequestHeaders
   ): Promise<any>;
 
   put(
@@ -30,16 +30,14 @@ export interface Connection {
     suffix: string,
     body: RequestBody,
     queryParams?: QueryParams,
-    headers?: RequestHeaders,
-    callback?: RequestCallback
+    headers?: RequestHeaders
   ): Promise<any>;
 
   delete(
     basePath: string,
     suffix: string,
     queryParams?: QueryParams,
-    headers?: RequestHeaders,
-    callback?: RequestCallback
+    headers?: RequestHeaders
   ): Promise<any>;
 }
 
@@ -93,8 +91,7 @@ export abstract class GenericConnection implements Connection {
                     412,
                     '901',
                     'Configuration must contain API key to use this method'
-                  ),
-                  callback
+                  )
                 );*/
   }
 
@@ -126,11 +123,7 @@ export abstract class GenericConnection implements Connection {
     basePath: string,
     suffix: string,
     queryParams?: any[],
-    headers?: any,
-    callback?:
-      | ((error: T1CLibException, data: DataArrayResponse) => void)
-      | ((error: T1CLibException, data: SingleReaderResponse) => void)
-      | undefined
+    headers?: any
   ): Promise<any> {
     const securityConfig = this.getSecurityConfig();
     return this.handleRequest(
@@ -141,8 +134,7 @@ export abstract class GenericConnection implements Connection {
       securityConfig,
       undefined,
       queryParams,
-      headers,
-      callback
+      headers
     );
   }
 
@@ -161,8 +153,7 @@ export abstract class GenericConnection implements Connection {
     suffix: string,
     body: RequestBody,
     queryParams?: QueryParams,
-    headers?: RequestHeaders,
-    callback?: RequestCallback
+    headers?: RequestHeaders
   ): Promise<any> {
     const securityConfig = this.getSecurityConfig();
     return this.handleRequest(
@@ -173,8 +164,7 @@ export abstract class GenericConnection implements Connection {
       securityConfig,
       body,
       queryParams,
-      headers,
-      callback
+      headers
     );
   }
 
@@ -193,8 +183,7 @@ export abstract class GenericConnection implements Connection {
     suffix: string,
     body: RequestBody,
     queryParams?: QueryParams,
-    headers?: RequestHeaders,
-    callback?: RequestCallback
+    headers?: RequestHeaders
   ): Promise<any> {
     const securityConfig = this.getSecurityConfig();
     return this.handleRequest(
@@ -205,8 +194,7 @@ export abstract class GenericConnection implements Connection {
       securityConfig,
       body,
       queryParams,
-      headers,
-      callback
+      headers
     );
   }
 
@@ -223,8 +211,7 @@ export abstract class GenericConnection implements Connection {
     basePath: string,
     suffix: string,
     queryParams?: QueryParams,
-    headers?: RequestHeaders,
-    callback?: RequestCallback
+    headers?: RequestHeaders
   ): Promise<any> {
     const securityConfig = this.getSecurityConfig();
 
@@ -236,8 +223,7 @@ export abstract class GenericConnection implements Connection {
       securityConfig,
       undefined,
       queryParams,
-      headers,
-      callback
+      headers
     );
   }
 
@@ -283,20 +269,14 @@ export abstract class GenericConnection implements Connection {
   protected handleRequest(
     basePath: string,
     suffix: string,
-    method: string,
+    method: Method,
     gclConfig: T1CConfig,
     securityConfig: SecurityConfig,
     body?: RequestBody,
     params?: QueryParams,
-    headers?: RequestHeaders,
-    callback?: RequestCallback
+    headers?: RequestHeaders
   ): Promise<any> {
     // init callback if necessary
-    if (!callback || typeof callback !== 'function') {
-      callback = function () {
-        /* no-op */
-      };
-    }
 
     // if Citrix environment, check that agentPort was defined in config
     if (
@@ -305,9 +285,7 @@ export abstract class GenericConnection implements Connection {
       gclConfig.agentPort !== -1
     ) {
       const config: AxiosRequestConfig = {
-        // use UrlUtil to create correct URL based on config
         url: UrlUtil.create(basePath, suffix, securityConfig.skipCitrixCheck),
-        // @ts-ignore
         method,
         headers: this.getRequestHeaders(headers),
         responseType: 'json',
@@ -354,9 +332,6 @@ export abstract class GenericConnection implements Connection {
                   gclConfig
                 );
 
-                // call callback function
-                // @ts-ignore
-                callback(undefined, response.data);
                 // and resolve the promise
                 return resolve(response.data);
               })
@@ -368,23 +343,11 @@ export abstract class GenericConnection implements Connection {
                     '999',
                     'Network error occurred. Request could not be completed'
                   );
-                  // @ts-ignore
-                  callback(thrownError, null);
                   return reject(thrownError);
                 } else {
                   if (error.response) {
                     if (error.response.data) {
                       if (error.response.data.message) {
-                        // @ts-ignore
-                        callback(
-                          new T1CLibException(
-                            500,
-                            '' +
-                              (error.response.data.code || error.code || '998'),
-                            error.response.data.message
-                          ),
-                          undefined
-                        );
                         return reject(
                           new T1CLibException(
                             500,
@@ -394,16 +357,6 @@ export abstract class GenericConnection implements Connection {
                           )
                         );
                       } else if (error.response.data.description) {
-                        // @ts-ignore
-                        callback(
-                          new T1CLibException(
-                            500,
-                            '' +
-                              (error.response.data.code || error.code || '998'),
-                            error.response.data.description
-                          ),
-                          null
-                        );
                         return reject(
                           new T1CLibException(
                             500,
@@ -413,16 +366,6 @@ export abstract class GenericConnection implements Connection {
                           )
                         );
                       } else {
-                        // @ts-ignore
-                        callback(
-                          new T1CLibException(
-                            500,
-                            '' +
-                              (error.response.data.code || error.code || '998'),
-                            error.response.data
-                          ),
-                          null
-                        );
                         return reject(
                           new T1CLibException(
                             500,
@@ -433,15 +376,6 @@ export abstract class GenericConnection implements Connection {
                         );
                       }
                     } else {
-                      // @ts-ignore
-                      callback(
-                        new T1CLibException(
-                          500,
-                          '' + error.code || '998',
-                          JSON.stringify(error.response)
-                        ),
-                        null
-                      );
                       return reject(
                         new T1CLibException(
                           500,
@@ -451,15 +385,6 @@ export abstract class GenericConnection implements Connection {
                       );
                     }
                   } else {
-                    // @ts-ignore
-                    callback(
-                      new T1CLibException(
-                        500,
-                        '' + error.code || '998',
-                        JSON.stringify(error)
-                      ),
-                      null
-                    );
                     return reject(
                       new T1CLibException(
                         500,
@@ -484,7 +409,6 @@ export abstract class GenericConnection implements Connection {
         status: 400,
         code: '801',
       };
-      callback(agentPortError, null);
       return Promise.reject(agentPortError);
     }
   }
@@ -548,17 +472,8 @@ export class LocalAuthAdminConnection extends GenericConnection
    * @param {RequestCallback} callback
    * @returns {Promise<any>}
    */
-  public requestLogFile(
-    basePath: string,
-    suffix: string,
-    callback?: RequestCallback
-  ): Promise<any> {
+  public requestLogFile(basePath: string, suffix: string): Promise<any> {
     // init callback if necessary
-    if (!callback || typeof callback !== 'function') {
-      callback = function () {
-        /* no-op */
-      };
-    }
     const headers = this.getRequestHeaders({});
     return new Promise((resolve, reject) => {
       axios
@@ -568,24 +483,16 @@ export class LocalAuthAdminConnection extends GenericConnection
         })
         .then(
           response => {
-            // @ts-ignore
-            callback(null, response);
             return resolve(response);
           },
           error => {
             if (error.response) {
               if (error.response.data) {
-                // @ts-ignore
-                callback(error.response.data, null);
                 return reject(error.response.data);
               } else {
-                // @ts-ignore
-                callback(error.response, null);
                 return reject(error.response);
               }
             } else {
-              // @ts-ignore
-              callback(error, null);
               return reject(error);
             }
           }
@@ -639,8 +546,7 @@ export class LocalAuthConnection extends GenericConnection
     basePath: string,
     suffix: string,
     queryParams?: QueryParams,
-    headers?: RequestHeaders,
-    callback?: RequestCallback
+    headers?: RequestHeaders
   ): Promise<any> {
     const securityConfig = this.getSecurityConfig();
     securityConfig.skipCitrixCheck = true;
@@ -652,8 +558,7 @@ export class LocalAuthConnection extends GenericConnection
       securityConfig,
       undefined,
       queryParams,
-      this.getRequestHeaders(headers),
-      callback
+      this.getRequestHeaders(headers)
     );
   }
 
@@ -662,8 +567,7 @@ export class LocalAuthConnection extends GenericConnection
     suffix: string,
     queryParams?: QueryParams,
     body?: RequestBody,
-    headers?: RequestHeaders,
-    callback?: RequestCallback
+    headers?: RequestHeaders
   ): Promise<any> {
     const securityConfig = this.getSecurityConfig();
     securityConfig.skipCitrixCheck = true;
@@ -675,8 +579,7 @@ export class LocalAuthConnection extends GenericConnection
       securityConfig,
       body,
       queryParams,
-      this.getRequestHeaders(headers),
-      callback
+      this.getRequestHeaders(headers)
     );
   }
 
@@ -687,17 +590,8 @@ export class LocalAuthConnection extends GenericConnection
    * @param {RequestCallback} callback
    * @returns {Promise<any>}
    */
-  public requestLogFile(
-    basePath: string,
-    suffix: string,
-    callback?: RequestCallback
-  ): Promise<any> {
+  public requestLogFile(basePath: string, suffix: string): Promise<any> {
     // init callback if necessary
-    if (!callback || typeof callback !== 'function') {
-      callback = function () {
-        /* no-op */
-      };
-    }
 
     return new Promise((resolve, reject) => {
       const headers: RequestHeaders = this.getRequestHeaders({});
@@ -708,24 +602,16 @@ export class LocalAuthConnection extends GenericConnection
         })
         .then(
           response => {
-            // @ts-ignore
-            callback(null, response);
             return resolve(response);
           },
           error => {
             if (error.response) {
               if (error.response.data) {
-                // @ts-ignore
-                callback(error.response.data, null);
                 return reject(error.response.data);
               } else {
-                // @ts-ignore
-                callback(error.response, null);
                 return reject(error.response);
               }
             } else {
-              // @ts-ignore
-              callback(error, null);
               return reject(error);
             }
           }
@@ -780,8 +666,7 @@ export class LocalConnection extends GenericConnection implements Connection {
     basePath: string,
     suffix: string,
     queryParams?: QueryParams,
-    headers?: RequestHeaders,
-    callback?: RequestCallback
+    headers?: RequestHeaders
   ): Promise<any> {
     const securityConfig = this.getSecurityConfig();
     securityConfig.skipCitrixCheck = true;
@@ -793,8 +678,7 @@ export class LocalConnection extends GenericConnection implements Connection {
       securityConfig,
       undefined,
       queryParams,
-      headers,
-      callback
+      headers
     );
   }
 
@@ -816,7 +700,7 @@ export class LocalConnection extends GenericConnection implements Connection {
                   entity: string;
                   rel_path: [string] | undefined;
               },
-              callback?: ((error: T1CLibException, data: FileListResponse) => void)
+
           ): Promise<any> {
               // init callback if necessary
               if (!callback || typeof callback !== 'function') {
@@ -827,10 +711,10 @@ export class LocalConnection extends GenericConnection implements Connection {
 
               return new Promise((resolve, reject) => {
                   const headers = {};
-                  // @ts-ignore
+
                   headers[GenericConnection.HEADER_GCL_LANG] = this.cfg.lang;
                   if (this.cfg.tokenCompatible && this.getSecurityConfig().sendToken) {
-                      // @ts-ignore
+
                       headers[GenericConnection.AUTH_TOKEN_HEADER] = BrowserFingerprint.get();
                   }
                   axios
@@ -840,23 +724,23 @@ export class LocalConnection extends GenericConnection implements Connection {
                       })
                       .then(
                           response => {
-                              // @ts-ignore
+
                               callback(null, response.data);
                               return resolve(response.data);
                           },
                           error => {
                               if (error.response) {
                                   if (error.response.data) {
-                                      // @ts-ignore
+
                                       callback(error.response.data, null);
                                       return reject(error.response.data);
                                   } else {
-                                      // @ts-ignore
+
                                       callback(error.response, null);
                                       return reject(error.response);
                                   }
                               } else {
-                                  // @ts-ignore
+
                                   callback(error, null);
                                   return reject(error);
                               }
@@ -879,7 +763,7 @@ export class LocalConnection extends GenericConnection implements Connection {
               suffix: string,
               body: RequestBody,
               queryParams: undefined,
-              callback?:
+
                   | ((error: T1CLibException, data: FileListResponse) => void)
                   | undefined
           ): Promise<any> {
@@ -910,10 +794,10 @@ export class LocalConnection extends GenericConnection implements Connection {
               form.append('file', body.file);
               const headers = {'Content-Type': 'multipart/form-data'};
               if (this.cfg.tokenCompatible && this.getSecurityConfig().sendToken) {
-                  // @ts-ignore
+
                   headers[GenericConnection.AUTH_TOKEN_HEADER] = BrowserFingerprint.get();
               }
-              // @ts-ignore
+
               headers[GenericConnection.HEADER_GCL_LANG] = this.cfg.lang;
 
               return new Promise((resolve, reject) => {
@@ -923,23 +807,23 @@ export class LocalConnection extends GenericConnection implements Connection {
                       })
                       .then(
                           response => {
-                              // @ts-ignore
+
                               callback(null, response.data);
                               return resolve(response.data);
                           },
                           error => {
                               if (error.response) {
                                   if (error.response.data) {
-                                      // @ts-ignore
+
                                       callback(error.response.data, null);
                                       return reject(error.response.data);
                                   } else {
-                                      // @ts-ignore
+
                                       callback(error.response, null);
                                       return reject(error.response);
                                   }
                               } else {
-                                  // @ts-ignore
+
                                   callback(error, null);
                                   return reject(error);
                               }
@@ -1001,21 +885,16 @@ export class LocalTestConnection extends GenericConnection
     basePath: string,
     suffix: string,
     queryParams?: any[],
-    headers?: undefined,
-    callback?:
-      | ((error: T1CLibException, data: DataArrayResponse) => void)
-      | undefined
+    headers?: undefined
   ): Promise<any> {
     return this.handleTestRequest(
       basePath,
       suffix,
       'GET',
-      // @ts-ignore
       this.config,
       undefined,
       queryParams,
-      headers,
-      callback
+      headers
     );
   }
 
@@ -1024,19 +903,16 @@ export class LocalTestConnection extends GenericConnection
     suffix: string,
     body: RequestBody,
     queryParams?: QueryParams,
-    headers?: RequestHeaders,
-    callback?: RequestCallback
+    headers?: RequestHeaders
   ): Promise<any> {
     return this.handleTestRequest(
       basePath,
       suffix,
       'POST',
-      // @ts-ignore
       this.config,
       body,
       queryParams,
-      headers,
-      callback
+      headers
     );
   }
 
@@ -1045,19 +921,16 @@ export class LocalTestConnection extends GenericConnection
     suffix: string,
     body: RequestBody,
     queryParams?: QueryParams,
-    headers?: RequestHeaders,
-    callback?: RequestCallback
+    headers?: RequestHeaders
   ): Promise<any> {
     return this.handleTestRequest(
       basePath,
       suffix,
       'PUT',
-      // @ts-ignore
       this.config,
       body,
       queryParams,
-      headers,
-      callback
+      headers
     );
   }
 
@@ -1065,23 +938,20 @@ export class LocalTestConnection extends GenericConnection
     basePath: string,
     suffix: string,
     queryParams?: QueryParams,
-    headers?: RequestHeaders,
-    callback?: RequestCallback
+    headers?: RequestHeaders
   ): Promise<any> {
     return this.handleTestRequest(
       basePath,
       suffix,
       'DELETE',
-      // @ts-ignore
       this.config,
       undefined,
       queryParams,
-      headers,
-      callback
+      headers
     );
   }
 
-  getRequestHeaders(headers: RequestHeaders) {
+  getRequestHeaders(headers: RequestHeaders | undefined) {
     const reqHeaders = headers || {};
     reqHeaders['Accept-Language'] = 'en-US';
     reqHeaders['X-Consumer-Username'] = 'testorg.testapp.v1';
@@ -1094,36 +964,27 @@ export class LocalTestConnection extends GenericConnection
   private handleTestRequest(
     basePath: string,
     suffix: string,
-    method: string,
-    gclConfig: T1CConfig,
+    method: Method,
+    gclConfig: T1CConfig | undefined,
     body?: any,
     params?: any,
-    headers?: RequestHeaders,
-    callback?: (error: any, data: any) => void
+    headers?: RequestHeaders
   ): Promise<any> {
     // init callback if necessary
-    if (!callback || typeof callback !== 'function') {
-      callback = function () {
-        /* no-op */
-      };
-    }
 
     // if Citrix environment, check that agentPort was defined in config
-    if (gclConfig.citrix && gclConfig.agentPort === -1) {
+    if (gclConfig && gclConfig.citrix && gclConfig.agentPort === -1) {
       const agentPortError: T1CLibException = {
         description:
           'Running in Citrix environment but no Agent port was defined in config.',
         status: 400,
         code: '801',
       };
-      callback(agentPortError, null);
       return Promise.reject(agentPortError);
     } else {
       const config: AxiosRequestConfig = {
         url: UrlUtil.create(basePath, suffix, true),
-        // @ts-ignore
         method,
-        // @ts-ignore
         headers: this.getRequestHeaders(headers),
         responseType: 'json',
       };
@@ -1133,7 +994,7 @@ export class LocalTestConnection extends GenericConnection
       if (params) {
         config.params = params;
       }
-      if (gclConfig.gclJwt) {
+      if (gclConfig && gclConfig.gclJwt) {
         config.headers.Authorization = 'Bearer ' + gclConfig.gclJwt;
       }
 
@@ -1141,18 +1002,12 @@ export class LocalTestConnection extends GenericConnection
         axios
           .request(config)
           .then((response: AxiosResponse) => {
-            // @ts-ignore
-            callback(null, response.data);
             return resolve(response.data);
           })
           .catch((error: AxiosError) => {
             if (error.response) {
-              // @ts-ignore
-              callback(error.response, null);
               return reject(error.response);
             } else {
-              // @ts-ignore
-              callback(error, null);
               return reject(error);
             }
           });

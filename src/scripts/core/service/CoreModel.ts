@@ -1,7 +1,5 @@
-import {T1CLibException} from '../exceptions/CoreExceptions';
 import {T1CClient} from '../T1CSdk';
-// @ts-ignore
-import * as pkijs from 'pkijs';
+import Certificate from 'pkijs/src/Certificate';
 
 export interface AbstractCore {
   // async
@@ -12,57 +10,50 @@ export interface AbstractCore {
     alertLevel?: string,
     alertPosition?: string,
     type?: string,
-    timeoutInSeconds?: number,
-    callback?: (error: T1CLibException, data: BoolDataResponse) => void
+    timeoutInSeconds?: number
   ): Promise<BoolDataResponse>;
+
   getImplicitConsent(
     codeWord: string,
     durationInDays?: number,
-    type?: string,
-    callback?: (error: T1CLibException, data: BoolDataResponse) => void
+    type?: string
   ): Promise<BoolDataResponse>;
-  info(
-    callback?: (error: T1CLibException, data: InfoResponse) => void
-  ): void | Promise<InfoResponse>;
-  infoBrowser(
-    callback?: (error: T1CLibException | undefined, data: BrowserInfoResponse) => void
-  ): Promise<BrowserInfoResponse> | undefined;
+
+  info(): void | Promise<InfoResponse>;
+
+  infoBrowser(): Promise<BrowserInfoResponse> | undefined;
+
   pollCardInserted(
     secondsToPollCard?: number,
-    callback?: (error: T1CLibException, data: CardReader) => void,
     connectReader?: () => void,
     insertCard?: () => void,
     cardTimeout?: () => void
   ): Promise<CardReader>;
+
   pollReadersWithCards(
     secondsToPollCard?: number,
-    callback?: (error: T1CLibException, data: CardReadersResponse) => void,
     connectReader?: () => void,
     insertCard?: () => void,
     cardTimeout?: () => void
   ): Promise<CardReadersResponse>;
+
   pollReaders(
     secondsToPollReader?: number,
-    callback?: (error: T1CLibException, data: CardReadersResponse) => void,
     connectReader?: () => void,
     readerTimeout?: () => void
   ): Promise<CardReadersResponse>;
-  reader(
-    reader_id: string,
-    callback?: (error: T1CLibException, data: SingleReaderResponse) => void
-  ): Promise<SingleReaderResponse>;
-  readers(
-    callback?: (error: T1CLibException, data: CardReadersResponse) => void
-  ): Promise<CardReadersResponse>;
-  readersCardAvailable(
-    callback?: (error: T1CLibException, data: CardReadersResponse) => void
-  ): Promise<CardReadersResponse>;
-  readersCardsUnavailable(
-    callback?: (error: T1CLibException, data: CardReadersResponse) => void
-  ): Promise<CardReadersResponse>;
+
+  reader(reader_id: string): Promise<SingleReaderResponse>;
+
+  readers(): Promise<CardReadersResponse>;
+
+  readersCardAvailable(): Promise<CardReadersResponse>;
+
+  readersCardsUnavailable(): Promise<CardReadersResponse>;
 
   // sync
   getUrl(): string;
+
   infoBrowserSync(): BrowserInfoResponse;
 
   checkGclVersion(
@@ -183,7 +174,7 @@ export class T1CCertificate {
   constructor(
     public base64: string,
     public id?: string,
-    public parsed?: pkijs.Certificate
+    public parsed?: Certificate
   ) {}
 }
 

@@ -1,11 +1,10 @@
 export {UrlUtil};
 
 class UrlUtil {
-    // constructor
-    constructor() {
-    }
+  // constructor
+  constructor() {}
 
-    public static create(base: string, suffix: string, skipCitrixCheck: boolean) {
-        return base + suffix;
-    }
+  public static create(base: string, suffix: string, skipCitrixCheck: boolean) {
+    return base + suffix;
+  }
 }

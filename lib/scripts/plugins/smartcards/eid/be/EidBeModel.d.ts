@@ -1,20 +1,18 @@
-import { T1CLibException } from '../../../../core/exceptions/CoreExceptions';
-import { CertificateResponse, DataObjectResponse, DataResponse, T1CCertificate, T1CResponse } from '../../../../core/service/CoreModel';
+import { CertificateResponse, DataObjectResponse, DataResponse, T1CCertificate, T1CResponse } from '../../../../..';
 export interface AbstractEidBE {
-    allData(filters: string[], callback?: (error: T1CLibException, data: BeidAllDataResponse) => void): Promise<BeidAllDataResponse>;
-    allCerts(filters: string[], callback?: (error: T1CLibException, data: BeidAllCertsResponse) => void): Promise<BeidAllCertsResponse>;
-    rnData(callback?: (error: T1CLibException, data: BeidRnDataResponse) => void): Promise<BeidRnDataResponse>;
-    tokenData(callback?: (error: T1CLibException, data: BeidTokenDataResponse) => void): Promise<BeidTokenDataResponse>;
-    address(callback?: (error: T1CLibException, data: BeidAddressResponse) => void): Promise<BeidAddressResponse>;
-    picture(callback?: (error: T1CLibException, data: DataResponse) => void): Promise<DataResponse>;
-    rootCertificate(callback?: (error: T1CLibException, data: CertificateResponse) => void): Promise<CertificateResponse>;
-    citizenCertificate(callback?: (error: T1CLibException, data: CertificateResponse) => void): Promise<CertificateResponse>;
-    authenticationCertificate(callback?: (error: T1CLibException, data: CertificateResponse) => void): Promise<CertificateResponse>;
-    nonRepudiationCertificate(callback?: (error: T1CLibException, data: CertificateResponse) => void): Promise<CertificateResponse>;
-    rrnCertificate(callback?: (error: T1CLibException, data: CertificateResponse) => void): Promise<CertificateResponse>;
-    verifyPin(callback?: (error: T1CLibException, data: T1CResponse) => void): Promise<T1CResponse>;
-    verifyPinWithEncryptedPin(callback?: (error: T1CLibException, data: T1CResponse) => void): Promise<T1CResponse>;
-    tokenData(callback?: (error: T1CLibException, data: BeidTokenDataResponse) => void): Promise<BeidTokenDataResponse>;
+    allData(filters: string[]): Promise<BeidAllDataResponse>;
+    allCerts(filters: string[]): Promise<BeidAllCertsResponse>;
+    rnData(): Promise<BeidRnDataResponse>;
+    tokenData(): Promise<BeidTokenDataResponse>;
+    address(): Promise<BeidAddressResponse>;
+    picture(): Promise<DataResponse>;
+    rootCertificate(): Promise<CertificateResponse>;
+    citizenCertificate(): Promise<CertificateResponse>;
+    authenticationCertificate(): Promise<CertificateResponse>;
+    nonRepudiationCertificate(): Promise<CertificateResponse>;
+    rrnCertificate(): Promise<CertificateResponse>;
+    verifyPin(): Promise<T1CResponse>;
+    verifyPinWithEncryptedPin(): Promise<T1CResponse>;
 }
 export declare class BeidAddressResponse extends DataObjectResponse {
     data: BeidAddress;

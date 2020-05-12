@@ -6,6 +6,10 @@ This is version 3 of the library, and is intended to be used with Trust1Connecto
 
 When the Trust1Connector isn’t installed the library will return an uninitialised client which can be used to download a client installer.
 
+# Requirements
+- NodeJS 12.16.1 (LTS)
+- yarn 1.21.x
+
 ## Backward compatibility
 The library will detect the installed version of Trust1Connector and will only function with version 2.0.0 and higher.
 
@@ -44,12 +48,6 @@ Navigate to the root directory and use Yarn to download and the necessary depend
 ```bash
 $ yarn
 ```
-##### OR
-Use npm install
-```bash
-$ npm install
-```
-
 #### Run tests
 Use npm run the test suite of the project
 ```bash

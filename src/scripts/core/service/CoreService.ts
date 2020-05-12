@@ -64,15 +64,14 @@ export class CoreService implements AbstractCore {
     alertLevel?: string,
     alertPosition?: string,
     type?: string,
-    timeoutInSeconds?: number,
-    callback?: (error: T1CLibException, data: BoolDataResponse) => void
+    timeoutInSeconds?: number
   ): Promise<BoolDataResponse> {
     /*        if (!title || !title.length) {
-            return ResponseHandler.error({status: 400, description: 'Title is required!', code: '801'}, callback);
-        }
-        if (!codeWord || !codeWord.length) {
-            return ResponseHandler.error({status: 400, description: 'Code word is required!', code: '801'}, callback);
-        }*/
+                return ResponseHandler.error({status: 400, description: 'Title is required!', code: '801'}, callback);
+            }
+            if (!codeWord || !codeWord.length) {
+                return ResponseHandler.error({status: 400, description: 'Code word is required!', code: '801'}, callback);
+            }*/
     let days: number = this.connection.cfg.defaultConsentDuration;
     if (durationInDays) {
       days = durationInDays;
@@ -95,8 +94,7 @@ export class CoreService implements AbstractCore {
         timeout,
       },
       undefined,
-      undefined,
-      callback
+      undefined
     );
   }
 
@@ -104,12 +102,11 @@ export class CoreService implements AbstractCore {
   public getImplicitConsent(
     codeWord: string,
     durationInDays?: number,
-    type?: string,
-    callback?: (error: T1CLibException, data: BoolDataResponse) => void
+    type?: string
   ): Promise<BoolDataResponse> {
     /*        if (!codeWord || !codeWord.length) {
-            return ResponseHandler.error({status: 400, description: 'Code word is required!', code: '801'}, callback);
-        }*/
+                return ResponseHandler.error({status: 400, description: 'Code word is required!', code: '801'}, callback);
+            }*/
     let days: number = this.connection.cfg.defaultConsentDuration;
     if (durationInDays) {
       days = durationInDays;
@@ -119,66 +116,40 @@ export class CoreService implements AbstractCore {
       CORE_CONSENT_IMPLICIT,
       {challenge: codeWord, days, type},
       undefined,
-      undefined,
-      callback
+      undefined
     );
   }
 
-  public info(
-    callback?: (error: T1CLibException, data: InfoResponse) => void
-  ): Promise<InfoResponse> {
+  public info(): Promise<InfoResponse> {
     return this.connection.getSkipCitrix(
       this.url,
       CORE_INFO,
       undefined,
-      undefined,
-      callback
+      undefined
     );
   }
 
-  public infoBrowser(
-    callback?: (
-      error: T1CLibException | undefined,
-      data: BrowserInfoResponse
-    ) => void
-  ): Promise<BrowserInfoResponse> | undefined {
-    if (callback) {
-      callback(undefined, CoreService.platformInfo());
-      return undefined;
-    } else {
-      return Promise.resolve(CoreService.platformInfo());
-    }
+  public infoBrowser(): Promise<BrowserInfoResponse> | undefined {
+    return Promise.resolve(CoreService.platformInfo());
   }
 
-  public retrieveEncryptedUserPin(
-    callback?: (error: T1CLibException, data: DataResponse) => void
-  ): Promise<DataResponse> {
+  public retrieveEncryptedUserPin(): Promise<DataResponse> {
     return this.connection.post(
       this.url,
       CORE_RETUREVE_ENCRYPTED_PIN,
       {},
       undefined,
-      undefined,
-      callback
+      undefined
     );
   }
 
   public pollCardInserted(
     secondsToPollCard?: number,
-    callback?: (error: T1CLibException, data: CardReader) => void,
     connectReaderCb?: () => void,
     insertCardCb?: () => void,
     cardTimeoutCb?: () => void
   ): Promise<CardReader> {
     const maxSeconds = secondsToPollCard || 30;
-    const self = this;
-
-    // init callback if necessary
-    if (!callback || typeof callback !== 'function') {
-      callback = function () {
-        /* no-op */
-      };
-    }
 
     // promise
     return new Promise<CardReader>((resolve, reject) => {
@@ -190,112 +161,103 @@ export class CoreService implements AbstractCore {
       reject?: (error: any) => void
     ) {
       /*setTimeout(() => {
-                --maxSeconds;
-                self.readers((error: T1CLibException, data: CardReadersResponse) => {
-                    if (error) {
-                        if (connectReaderCb) {
-                            connectReaderCb();
-                        } // ask to connect reader
-                        poll(resolve, reject); // no reader found and waiting - recursive call
-                    }
-                    // no error but stop
-                    if (maxSeconds === 0) {
-                        if (cardTimeoutCb) {
-                            return cardTimeoutCb();
-                        } else {
-                            if (reject) {
-                                reject({success: false, message: 'Timed out'});
-                            }
-                        }
-                    } // reader timeout
-                    else if (data.data.length === 0) {
-                        if (connectReaderCb) {
-                            connectReaderCb();
-                        } // ask to connect reader
-                        poll(resolve, reject);
-                    } else {
-                        let readerWithCard = data.data.find((reader: CardReader) => {
-                            return !!reader.card;
-                        });
-                        if (readerWithCard != null) {
-                            callback(null, readerWithCard);
-                            resolve(readerWithCard);
-                        } else {
-                            if (insertCardCb) {
-                                insertCardCb();
-                            }
-                            poll(resolve, reject);
-                        }
-                    }
-                });
-            }, 1000);*/
+                      --maxSeconds;
+                      self.readers((error: T1CLibException, data: CardReadersResponse) => {
+                          if (error) {
+                              if (connectReaderCb) {
+                                  connectReaderCb();
+                              } // ask to connect reader
+                              poll(resolve, reject); // no reader found and waiting - recursive call
+                          }
+                          // no error but stop
+                          if (maxSeconds === 0) {
+                              if (cardTimeoutCb) {
+                                  return cardTimeoutCb();
+                              } else {
+                                  if (reject) {
+                                      reject({success: false, message: 'Timed out'});
+                                  }
+                              }
+                          } // reader timeout
+                          else if (data.data.length === 0) {
+                              if (connectReaderCb) {
+                                  connectReaderCb();
+                              } // ask to connect reader
+                              poll(resolve, reject);
+                          } else {
+                              let readerWithCard = data.data.find((reader: CardReader) => {
+                                  return !!reader.card;
+                              });
+                              if (readerWithCard != null) {
+                                  callback(null, readerWithCard);
+                                  resolve(readerWithCard);
+                              } else {
+                                  if (insertCardCb) {
+                                      insertCardCb();
+                                  }
+                                  poll(resolve, reject);
+                              }
+                          }
+                      });
+                  }, 1000);*/
     }
   }
 
   public pollReadersWithCards(
     secondsToPollCard?: number,
-    callback?: (error: T1CLibException, data: CardReadersResponse) => void,
     connectReaderCb?: () => void,
     insertCardCb?: () => void,
     cardTimeoutCb?: () => void
   ): Promise<CardReadersResponse> {
     const maxSeconds = secondsToPollCard || 30;
-    const self = this;
-
-    // init callback if necessary
-    if (!callback || typeof callback !== 'function') {
-      callback = function () {
-        /* no-op */
-      };
-    }
 
     // promise
     /*function poll(resolve?: (data: any) => void, reject?: (error: any) => void) {
-            setTimeout(() => {
-                --maxSeconds;
-                self.readers((error: T1CLibException, data: CardReadersResponse) => {
-                    if (error) {
-                        if (connectReaderCb) {
-                            connectReaderCb();
-                        }
-                        poll(resolve, reject);
-                    }
-                    if (maxSeconds === 0) {
-                        if (cardTimeoutCb) {
-                            return cardTimeoutCb();
-                        } else {
-                            if (reject) {
-                                reject({success: false, message: 'Timed out'});
-                            }
-                        }
-                    } // reader timeout
-                    else if (!Util.isEmpty(data) && !Util.isEmpty(data.data)) {
-                        // there are some readers, check if one of them has a card
-                        let readersWithCards = data.data.filter((reader: CardReader) => {
-                            return !!reader.card;
-                        });
-                        if (readersWithCards.length) {
-                            // reader with card found (at least one), return data
-                            let response = {data: readersWithCards, success: true};
-                            callback(null, response);
-                            resolve(response);
-                        } else {
-                            // no readers with card found, continue polling
-                            if (insertCardCb) {
-                                insertCardCb();
+                setTimeout(() => {
+                    --maxSeconds;
+                    self.readers((error: T1CLibException, data: CardReadersResponse) => {
+                        if (error) {
+                            if (connectReaderCb) {
+                                connectReaderCb();
                             }
                             poll(resolve, reject);
                         }
-                    } else {
-                        // length is zero, no readers connected
-                        if (connectReaderCb) {
-                            connectReaderCb();
+                        if (maxSeconds === 0) {
+                            if (cardTimeoutCb) {
+                                return cardTimeoutCb();
+                            } else {
+                                if (reject) {
+                                    reject({success: false, message: 'Timed out'});
+                                }
+                            }
+                        } // reader timeout
+                        else if (!Util.isEmpty(data) && !Util.isEmpty(data.data)) {
+                            // there are some readers, check if one of them has a card
+                            let readersWithCards = data.data.filter((reader: CardReader) => {
+                                return !!reader.card;
+                            });
+                            if (readersWithCards.length) {
+                                // reader with card found (at least one), return data
+                                let response = {data: readersWithCards, success: true};
+                                callback(null, response);
+                                resolve(response);
+                            } else {
+                                // no readers with card found, continue polling
+                                if (insertCardCb) {
+                                    insertCardCb();
+                                }
+                                poll(resolve, reject);
+                            }
+                        } else {
+                            // length is zero, no readers connected
+                            if (connectReaderCb) {
+                                connectReaderCb();
+                            }
+                            poll(resolve, reject);
                         }
-                        poll(resolve, reject);
-                    }
-                });
-            }, 1000);
-        }*/
+                    });
+                }, 1000);
+            }*/
 
     return new Promise<CardReadersResponse>((resolve, reject) => {
       //poll(resolve, reject);
@@ -304,19 +266,10 @@ export class CoreService implements AbstractCore {
 
   public pollReaders(
     secondsToPollReader?: number,
-    callback?: (error: T1CLibException, data: CardReadersResponse) => void,
     connectReaderCb?: () => void,
     readerTimeoutCb?: () => void
   ): Promise<CardReadersResponse> {
     const maxSeconds = secondsToPollReader || 30;
-    const self = this;
-
-    // init callback if necessary
-    if (!callback || typeof callback !== 'function') {
-      callback = function () {
-        /* no-op */
-      };
-    }
 
     // promise
     return new Promise<CardReadersResponse>((resolve, reject) => {
@@ -324,85 +277,67 @@ export class CoreService implements AbstractCore {
     });
 
     /*function poll(resolve?: (data: any) => void, reject?: (error: any) => void) {
-            setTimeout(() => {
-                --maxSeconds;
-                self.readers(function (error: T1CLibException, data: CardReadersResponse): void {
-                    if (error) {
-                        if (connectReaderCb) {
-                            connectReaderCb();
-                        } // ask to connect reader
-                        poll(resolve, reject); // no reader found and waiting - recursive call
-                    }
-                    // no error but stop
-                    if (maxSeconds === 0) {
-                        if (readerTimeoutCb) {
-                            return readerTimeoutCb();
-                        } // reader timeout
-                        else {
-                            if (reject) {
-                                reject({success: false, message: 'Timed out'});
-                            }
+                setTimeout(() => {
+                    --maxSeconds;
+                    self.readers(function (error: T1CLibException, data: CardReadersResponse): void {
+                        if (error) {
+                            if (connectReaderCb) {
+                                connectReaderCb();
+                            } // ask to connect reader
+                            poll(resolve, reject); // no reader found and waiting - recursive call
                         }
-                    } else if (Util.isEmpty(data) || Util.isEmpty(data.data)) {
-                        if (connectReaderCb) {
-                            connectReaderCb();
-                        } // ask to connect reader
-                        poll(resolve, reject);
-                    } else {
-                        callback(null, data);
-                        resolve(data);
-                    }
-                });
-            }, 1000);
-        }*/
+                        // no error but stop
+                        if (maxSeconds === 0) {
+                            if (readerTimeoutCb) {
+                                return readerTimeoutCb();
+                            } // reader timeout
+                            else {
+                                if (reject) {
+                                    reject({success: false, message: 'Timed out'});
+                                }
+                            }
+                        } else if (Util.isEmpty(data) || Util.isEmpty(data.data)) {
+                            if (connectReaderCb) {
+                                connectReaderCb();
+                            } // ask to connect reader
+                            poll(resolve, reject);
+                        } else {
+                            callback(null, data);
+                            resolve(data);
+                        }
+                    });
+                }, 1000);
+            }*/
   }
 
-  public reader(
-    reader_id: string,
-    callback?: (error: T1CLibException, data: SingleReaderResponse) => void
-  ): Promise<SingleReaderResponse> {
+  public reader(reader_id: string): Promise<SingleReaderResponse> {
     return this.connection.get(
       this.url,
       CORE_READERS + '/' + reader_id,
       undefined,
-      undefined,
-      callback
+      undefined
     );
   }
 
-  public readers(
-    callback?: (error: T1CLibException, data: CardReadersResponse) => void
-  ): Promise<CardReadersResponse> {
-    return this.connection.get(
-      this.url,
-      CORE_READERS,
-      undefined,
-      undefined,
-      callback
-    );
+  public readers(): Promise<CardReadersResponse> {
+    return this.connection.get(this.url, CORE_READERS, undefined, undefined);
   }
 
-  public readersCardAvailable(
-    callback?: (error: T1CLibException, data: CardReadersResponse) => void
-  ): Promise<CardReadersResponse> {
+  public readersCardAvailable(): Promise<CardReadersResponse> {
     return this.connection.get(
       this.url,
       CORE_READERS,
       [CoreService.cardInsertedFilter(true)],
-      undefined,
-      callback
+      undefined
     );
   }
 
-  public readersCardsUnavailable(
-    callback?: (error: T1CLibException, data: CardReadersResponse) => void
-  ): Promise<CardReadersResponse> {
+  public readersCardsUnavailable(): Promise<CardReadersResponse> {
     return this.connection.get(
       this.url,
       CORE_READERS,
       [CoreService.cardInsertedFilter(false)],
-      undefined,
-      callback
+      undefined
     );
   }
 
